@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>小红书文案智能体 · AI创作助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f9f5f0 0%, #f0ebe5 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* 头部标题区 */
+        .hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #d43f3f, #ff8c5a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.5rem;
+        }
+        .hero p {
+            color: #7e6b5c;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        /* 卡片通用样式 */
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(2px);
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+            padding: 1.8rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 28px 40px -14px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 输入卡片 */
+        .input-card {
+            margin-bottom: 2rem;
+        }
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+        .input-field {
+            flex: 3;
+            min-width: 200px;
+        }
+        .input-field label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #a0816e;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.3px;
+        }
+        .input-field input {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            font-size: 1rem;
+            border: 1.5px solid #f0e0d4;
+            border-radius: 48px;
+            background: white;
+            transition: all 0.2s;
+            outline: none;
+            font-family: inherit;
+            color: #3e2c21;
+        }
+        .input-field input:focus {
+            border-color: #ff8c5a;
+            box-shadow: 0 0 0 3px rgba(255, 140, 90, 0.2);
+        }
+        .generate-btn {
+            flex: 1;
+            background: linear-gradient(100deg, #ff7b4a, #ff5e2e);
+            border: none;
+            border-radius: 60px;
+            padding: 0.9rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 6px 12px -6px rgba(255, 94, 46, 0.4);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .generate-btn:hover {
+            background: linear-gradient(100deg, #ff6a3a, #ff4f1c);
+            transform: scale(0.98);
+            box-shadow: 0 4px 8px -4px rgba(255, 94, 46, 0.5);
+        }
+        .generate-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* 输出卡片 */
+        .output-card {
+            background: white;
+        }
+        .result-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid #ffede3;
+            padding-bottom: 0.8rem;
+        }
+        .result-header h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #3e2c21;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .score-badge {
+            background: #fef2e8;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #ff6b3d;
+        }
+        .copy-container {
+            background: #fefaf7;
+            border-radius: 24px;
+            padding: 1.3rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #ffe5d5;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #2c1f16;
+            font-family: inherit;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+        .suggestion-box {
+            background: #fef6f0;
+            border-left: 5px solid #ff8c5a;
+            padding: 1rem 1.2rem;
+            border-radius: 20px;
+            margin-top: 0.8rem;
+        }
+        .suggestion-box strong {
+            color: #c25a33;
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .suggestion-box p {
+            font-size: 0.9rem;
+            color: #4c3729;
+            line-height: 1.45;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 2rem;
+            color: #a0816e;
+            font-weight: 500;
+        }
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #ffdccc;
+            border-top-color: #ff7b4a;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error-message {
+            background: #ffeeee;
+            border-left: 5px solid #e05252;
+            padding: 1rem;
+            border-radius: 20px;
+            color: #b33;
+            font-size: 0.9rem;
+        }
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: #b89c88;
+        }
+        @media (max-width: 680px) {
+            body { padding: 1.2rem; }
+            .card { padding: 1.3rem; }
+            .input-group { flex-direction: column; align-items: stretch; }
+            .generate-btn { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1>📖 小红书文案智能体</h1>
+        <p>输入产品关键词 · 自动生成爆款文案 · AI评分择优</p>
+    </div>
+
+    <!-- 输入卡片 -->
+    <div class="card input-card">
+        <div class="input-group">
+            <div class="input-field">
+                <label>✨ 产品 / 关键词</label>
+                <input type="text" id="keyword" placeholder="例如：小白鞋 / 护手霜 / 月光石吊坠" value="小白鞋">
+            </div>
+            <button class="generate-btn" id="generateBtn">
+                ✨ 生成文案
+            </button>
+        </div>
+    </div>
+
+    <!-- 输出卡片 -->
+    <div class="card output-card" id="outputCard">
+        <div class="result-header">
+            <h2>📝 最佳文案</h2>
+            <div class="score-badge" id="scoreBadge">—</div>
+        </div>
+        <div id="copyContainer" class="copy-container">
+            <div style="color:#b29b87; text-align:center;">输入关键词后点击“生成文案” ✨</div>
+        </div>
+        <div id="suggestionBox" class="suggestion-box" style="display: none;">
+            <strong>💡 优化建议</strong>
+            <p id="suggestionText"></p>
+        </div>
+        <div id="loadingIndicator" style="display: none;" class="loading">
+            <div class="loading-spinner"></div>
+            <span>AI 正在思考中...</span>
+        </div>
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+    </div>
+    <footer>Powered by LangChain + 阿里云百炼 | 自动意图识别 · A/B测试 · 质量评分</footer>
+</div>
+
+<script>
+    const keywordInput = document.getElementById('keyword');
+    const generateBtn = document.getElementById('generateBtn');
+    const copyContainer = document.getElementById('copyContainer');
+    const scoreBadge = document.getElementById('scoreBadge');
+    const suggestionBox = document.getElementById('suggestionBox');
+    const suggestionText = document.getElementById('suggestionText');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const errorMessageDiv = document.getElementById('errorMessage');
+
+    // API 地址（如果部署到线上需修改）
+    const API_URL = 'http://localhost:8000/generate';
+
+    async function generate() {
+        const keyword = keywordInput.value.trim();
+        if (!keyword) {
+            showError('请输入产品关键词～');
+            return;
+        }
+
+        // 重置界面
+        copyContainer.innerHTML = '';
+        scoreBadge.innerText = '—';
+        suggestionBox.style.display = 'none';
+        errorMessageDiv.style.display = 'none';
+        loadingIndicator.style.display = 'flex';
+        generateBtn.disabled = true;
+        generateBtn.textContent = '⏳ 生成中...';
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ keyword })
+            });
+
+            if (!response.ok) {
+                let errMsg = `HTTP ${response.status}`;
+                try {
+                    const errData = await response.json();
+                    errMsg = errData.detail || errMsg;
+                } catch(e) {}
+                throw new Error(errMsg);
+            }
+
+            const data = await response.json();
+            // 数据示例: { best_copy: "...", score: 9, suggestions: "..." }
+            displayResult(data);
+        } catch (err) {
+            console.error(err);
+            showError(`请求失败：${err.message}。请确保 API 服务已启动 (python api.py)`);
+        } finally {
+            loadingIndicator.style.display = 'none';
+            generateBtn.disabled = false;
+            generateBtn.textContent = '✨ 生成文案';
+        }
+    }
+
+    function displayResult(data) {
+        const bestCopy = data.best_copy || '暂无文案';
+        const score = data.score !== undefined ? data.score : '—';
+        const suggestions = data.suggestions || '';
+
+        // 展示文案（保留换行格式）
+        copyContainer.innerText = bestCopy;
+        copyContainer.style.whiteSpace = 'pre-wrap';
+
+        // 展示分数
+        scoreBadge.innerText = `${score}分`;
+
+        // 展示建议
+        if (suggestions && suggestions.trim()) {
+            suggestionText.innerText = suggestions;
+            suggestionBox.style.display = 'block';
+        } else {
+            suggestionBox.style.display = 'none';
+        }
+    }
+
+    function showError(msg) {
+        errorMessageDiv.innerText = msg;
+        errorMessageDiv.style.display = 'block';
+        copyContainer.innerHTML = '<div style="color:#b29b87;">暂时无法获取文案，请稍后重试</div>';
+        scoreBadge.innerText = '—';
+        suggestionBox.style.display = 'none';
+    }
+
+    generateBtn.addEventListener('click', generate);
+    // 回车触发
+    keywordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') generate();
+    });
+</script>
+</body>
+</html>
