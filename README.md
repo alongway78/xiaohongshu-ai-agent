@@ -103,7 +103,7 @@ curl -X POST http://localhost:8000/generate -H "Content-Type: application/json" 
 }
 ```
 
-## 🧠 项目亮点与难点（面试向）
+## 🧠 项目亮点与难点
 
 - **意图识别**：使用 PromptTemplate + JsonOutputParser 实现结构化输出，并通过异常处理保证鲁棒性。
 - **A/B 测试**：双版本生成与自动择优，模拟线上实验流程。
@@ -124,5 +124,5 @@ curl -X POST http://localhost:8000/generate -H "Content-Type: application/json" 
 
 ## 📧 联系
 
-如有问题，欢迎提 Issue 或邮件联系：your-email@example.com
+如有问题，欢迎提 Issue 或邮件联系：2746988278@qq.com
 ```
